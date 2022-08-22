@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
+import 'package:vtracker/Services/http_client.dart';
+import 'package:vtracker/Services/secure_storage.dart';
 import 'package:vtracker/config.dart';
 
 import 'package:http/http.dart' as http;
@@ -16,6 +17,8 @@ class User {
   String? refreshToken;
 
   static User? ownUser;
+
+  static SecureStorage secureStorage = SecureStorage();
 
   User({
     required this.id,
@@ -53,9 +56,11 @@ class User {
             },
           ),
         )
-        .timeout(const Duration(seconds: 20))
+        .timeout(Config.requestTimeoutDuration)
         .then((res) {
       if (res.statusCode == 200) {
+        secureStorage.writeSecureData('email', email);
+        secureStorage.writeSecureData('password', password);
         return ownUser = User.fromJson(jsonDecode(res.body));
       } else {
         String errorMsg =
@@ -63,7 +68,6 @@ class User {
         throw Exception(errorMsg);
       }
     }, onError: (e) => {throw Exception("Request timeout exceeded")});
-    return;
   }
 
   static signup(
@@ -83,7 +87,7 @@ class User {
             },
           ),
         )
-        .timeout(const Duration(seconds: 20))
+        .timeout(Config.requestTimeoutDuration)
         .then((res) async {
       if (res.statusCode == 200) {
         try {
@@ -99,5 +103,21 @@ class User {
       }
     }, onError: (e) => {throw Exception("Request timeout exceeded")});
     return;
+  }
+
+  static Future<bool?> signout() async {
+    try {
+      print(ownUser!.refreshToken);
+      await HTTPClient.sendRequest(
+        method: 'delete',
+        path: 'auth/signout',
+        payload: {'refreshToken': ownUser!.refreshToken},
+        queryParameters: null,
+      );
+      return true;
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
   }
 }

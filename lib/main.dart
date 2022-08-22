@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:vtracker/screens/add_private_ride_screen.dart';
+
 import 'package:vtracker/screens/home_screen.dart';
 import 'package:vtracker/screens/login_screen.dart';
+import 'package:vtracker/screens/map_screen.dart';
+import 'package:vtracker/screens/ride_add_screen.dart';
 import 'package:vtracker/screens/signup_screen.dart';
 
 void main() {
@@ -18,22 +22,16 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
         fontFamily: 'Lato',
       ),
-      home: const MyHomePage(),
+      home: const LoginScreen(),
       debugShowCheckedModeBanner: false,
       routes: {
         LoginScreen.routeName: (ctx) => const LoginScreen(),
         SignupScreen.routeName: (ctx) => const SignupScreen(),
         HomeScreen.routeName: (ctx) => const HomeScreen(),
+        RideAddScreen.routeName: (ctx) => const RideAddScreen(),
+        MapScreen.routeName: (ctx) => const MapScreen(),
+        AddPrivateRideScreen.routeName: (ctx) => const AddPrivateRideScreen(),
       },
     );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const LoginScreen();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vtracker/Services/secure_storage.dart';
 import 'package:vtracker/screens/home_screen.dart';
 
 import 'package:vtracker/screens/signup_screen.dart';
@@ -19,7 +20,46 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final formKey = GlobalKey<FormState>();
 
-  bool isLoading = false;
+  final SecureStorage secureStorage = SecureStorage();
+
+  bool isLoading = true;
+
+  void _alreadyLoggedInCheck() async {
+    var email = await secureStorage.readSecureData('email');
+    var password = await secureStorage.readSecureData('password');
+    if (email == null || password == null) {
+      print('Not previously logged in');
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+    print('Previously logged in');
+
+    User.login(email, password).then(
+      (_) {
+        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+      },
+      onError: (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.red[300],
+          content: Row(
+            children: [
+              const Icon(Icons.error),
+              const SizedBox(
+                width: 6,
+              ),
+              Text(e.toString().substring(11))
+            ],
+          ),
+        ));
+
+        setState(() {
+          isLoading = false;
+        });
+      },
+    );
+  }
 
   void _loginHandler() {
     final isValidForm = formKey.currentState!.validate();
@@ -50,6 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _alreadyLoggedInCheck();
   }
 
   @override
