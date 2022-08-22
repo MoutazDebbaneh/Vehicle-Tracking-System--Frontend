@@ -3,23 +3,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vtracker/models/ride.dart';
 
-class AddPrivateRideScreen extends StatefulWidget {
-  static const routeName = "/addPrivateRide";
-  const AddPrivateRideScreen({Key? key}) : super(key: key);
+class AddDriverScreen extends StatefulWidget {
+  final String rideId;
+  const AddDriverScreen(this.rideId, {Key? key}) : super(key: key);
 
   @override
-  State<AddPrivateRideScreen> createState() => _AddPrivateRideScreenState();
+  State<AddDriverScreen> createState() => _AddDriverScreenState();
 }
 
-class _AddPrivateRideScreenState extends State<AddPrivateRideScreen> {
-  final titleController = TextEditingController();
-  final accessKeyController = TextEditingController();
+class _AddDriverScreenState extends State<AddDriverScreen> {
+  final emailController = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
 
   bool isLoading = false;
 
-  void _addPrivateRideHandler() async {
+  void _addDriverHandler() async {
     final isValidForm = formKey.currentState!.validate();
     if (!isValidForm) return;
     setState(() {
@@ -27,10 +26,8 @@ class _AddPrivateRideScreenState extends State<AddPrivateRideScreen> {
     });
 
     try {
-      bool? res = await Ride.addPrivateRide({
-        'title': titleController.text,
-        'access_key': accessKeyController.text
-      });
+      bool? res = await Ride.addDriver(
+          {'rideId': widget.rideId, 'userEmail': emailController.text});
 
       if (res == null || !res) {
         throw Exception('Operation failed');
@@ -46,8 +43,7 @@ class _AddPrivateRideScreenState extends State<AddPrivateRideScreen> {
               SizedBox(
                 width: 6,
               ),
-              Flexible(
-                  child: Text('Ride added to your private rides successfully'))
+              Flexible(child: Text('Driver added to your ride successfully'))
             ],
           ),
         ));
@@ -92,7 +88,7 @@ class _AddPrivateRideScreenState extends State<AddPrivateRideScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add a private ride'),
+        title: const Text('Add a driver'),
       ),
       body: Center(
         child: isLoading
@@ -105,45 +101,31 @@ class _AddPrivateRideScreenState extends State<AddPrivateRideScreen> {
                     children: [
                       TextFormField(
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.title),
+                          prefixIcon: Icon(Icons.email),
                           border: UnderlineInputBorder(),
-                          labelText: 'Ride Title',
+                          labelText: 'Driver email',
                         ),
                         keyboardType: TextInputType.text,
-                        controller: titleController,
-                        validator: (title) {
-                          return title != null && title.trim().isNotEmpty
-                              ? null
-                              : "Title must not be empty";
-                        },
-                      ),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.password),
-                          border: UnderlineInputBorder(),
-                          labelText: 'Ride Access Key',
-                        ),
-                        keyboardType: TextInputType.visiblePassword,
-                        controller: accessKeyController,
-                        validator: (accessKey) {
-                          return accessKey != null &&
-                                  accessKey.trim().isNotEmpty
-                              ? null
-                              : "Access Key must not be empty";
+                        controller: emailController,
+                        validator: (email) {
+                          bool isValid = email != null &&
+                              RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                  .hasMatch(email);
+                          return isValid ? null : "Please enter a valid email";
                         },
                       ),
                       const SizedBox(
                         height: 20,
                       ),
                       ElevatedButton(
-                        onPressed: _addPrivateRideHandler,
+                        onPressed: _addDriverHandler,
                         style: ButtonStyle(
                           backgroundColor:
                               MaterialStateProperty.all(Colors.green),
                           padding: MaterialStateProperty.all<EdgeInsets>(
                               const EdgeInsets.all(16)),
                         ),
-                        child: const Text('Add Private Ride'),
+                        child: const Text('Add Driver'),
                       )
                     ],
                   ),

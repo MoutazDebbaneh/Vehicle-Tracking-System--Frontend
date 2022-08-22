@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vtracker/models/ride.dart';
+import 'package:vtracker/models/user.dart';
+import 'package:vtracker/screens/add_driver_screen.dart';
 import 'package:vtracker/widgets/iconed_text_field.dart';
 
 class RideScreen extends StatefulWidget {
@@ -41,6 +44,11 @@ class _RideScreenState extends State<RideScreen> {
         ),
       );
 
+  void _assignDriverHandler() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: ((context) => AddDriverScreen(widget.ride.id))));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,9 +69,36 @@ class _RideScreenState extends State<RideScreen> {
                     label: 'Ride Title',
                     icon: const Icon(Icons.title),
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  widget.ride.creator == User.ownUser!.id &&
+                          widget.ride.isPublic != null &&
+                          !widget.ride.isPublic!
+                      ? Column(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(
+                                        text: widget.ride.accessKey ?? ''))
+                                    .then((_) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Access Key copied to clipboard")));
+                                });
+                              },
+                              child: IconedTextField(
+                                text: widget.ride.accessKey ?? '',
+                                label: 'Ride Access Key',
+                                icon: const Icon(Icons.password),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                          ],
+                        )
+                      : const SizedBox(
+                          height: 20,
+                        ),
                   IconedTextField(
                     text: widget.ride.isPublic! ? 'Public' : 'Private',
                     label: 'Ride Visibility',
@@ -185,6 +220,25 @@ class _RideScreenState extends State<RideScreen> {
                     label: 'Ride Ending Location',
                     icon: const Icon(Icons.location_on),
                   ),
+                  widget.ride.creator == User.ownUser!.id
+                      ? Column(
+                          children: [
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            ElevatedButton(
+                              onPressed: _assignDriverHandler,
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.green),
+                                padding: MaterialStateProperty.all<EdgeInsets>(
+                                    const EdgeInsets.all(16)),
+                              ),
+                              child: const Text('Assign Driver'),
+                            ),
+                          ],
+                        )
+                      : Container()
                 ],
               ),
             ),

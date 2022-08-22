@@ -124,4 +124,20 @@ class Ride {
       rethrow;
     }
   }
+
+  static Future<bool?> addDriver(Map payload) async {
+    try {
+      final res = await HTTPClient.sendRequest(
+        method: 'post',
+        path: 'ride/addDriver',
+        payload: payload,
+        queryParameters: null,
+      );
+
+      return true;
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
 }
