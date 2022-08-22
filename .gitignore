@@ -1,3 +1,6 @@
+#Config
+lib/config.dart
+
 # Miscellaneous
 *.class
 *.log
@@ -43,6 +46,3 @@ app.*.map.json
 android/app/debug
 android/app/profile
 android/app/release
-
-#Config
-lib/config.dart
