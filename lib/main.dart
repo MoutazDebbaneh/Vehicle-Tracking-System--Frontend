@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:vtracker/screens/add_driver_screen.dart';
-import 'package:vtracker/screens/add_private_ride_screen.dart';
 
+import 'package:vtracker/screens/add_private_ride_screen.dart';
 import 'package:vtracker/screens/home_screen.dart';
 import 'package:vtracker/screens/login_screen.dart';
-import 'package:vtracker/screens/map_screen.dart';
 import 'package:vtracker/screens/ride_add_screen.dart';
 import 'package:vtracker/screens/signup_screen.dart';
 
@@ -30,7 +28,6 @@ class MyApp extends StatelessWidget {
         SignupScreen.routeName: (ctx) => const SignupScreen(),
         HomeScreen.routeName: (ctx) => const HomeScreen(),
         RideAddScreen.routeName: (ctx) => const RideAddScreen(),
-        MapScreen.routeName: (ctx) => const MapScreen(),
         AddPrivateRideScreen.routeName: (ctx) => const AddPrivateRideScreen(),
       },
     );

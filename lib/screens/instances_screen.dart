@@ -124,7 +124,10 @@ class _InstancesScreenState extends State<InstancesScreen> {
                                     : Colors.grey,
                               ),
                             ),
-                            title: Text(instances[index].startDate),
+                            title: instances[index].endDate == null
+                                ? Text(instances[index].startDate)
+                                : Text(
+                                    'From:     ${instances[index].startDate}\nTo:           ${instances[index].endDate}'),
                             subtitle: Text(instances[index].endDate == null ||
                                     instances[index].endDate!.isEmpty
                                 ? 'Active'

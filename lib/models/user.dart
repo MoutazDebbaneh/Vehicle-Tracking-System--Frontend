@@ -76,7 +76,10 @@ class User {
       }
     }, onError: (e) {
       print(e.toString());
-      throw Exception("Request timeout exceeded");
+      if (e.toString().startsWith('TimeoutException')) {
+        throw Exception('Request timeout exceeded');
+      }
+      throw Exception(e.toString());
     });
   }
 

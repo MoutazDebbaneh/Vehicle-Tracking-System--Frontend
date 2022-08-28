@@ -15,6 +15,7 @@ class Ride {
   bool? isActive;
   bool? isFinished;
 
+  String? vehicle;
   String? accessKey;
   bool? isRepeatitive;
   dynamic repeatition;
@@ -29,6 +30,7 @@ class Ride {
     required this.startPoint,
     required this.endPoint,
     this.isPublic,
+    this.vehicle,
     this.isActive,
     this.isFinished,
     this.accessKey,
@@ -47,6 +49,7 @@ class Ride {
         startPoint: json['start_point'],
         endPoint: json['end_point'],
         isPublic: json['is_public'],
+        vehicle: json['vehicle'],
         isActive: json['is_active'],
         isFinished: json['is_finished'],
         accessKey: json['access_key'],
@@ -101,7 +104,7 @@ class Ride {
 
   static Future<bool?> deleteRide(String rideId) async {
     try {
-      final res = await HTTPClient.sendRequest(
+      await HTTPClient.sendRequest(
         method: 'delete',
         path: 'ride/delete/$rideId',
         payload: {},
@@ -117,7 +120,7 @@ class Ride {
 
   static Future<bool?> addPrivateRide(Map payload) async {
     try {
-      final res = await HTTPClient.sendRequest(
+      await HTTPClient.sendRequest(
         method: 'patch',
         path: 'ride/addPrivateRide',
         payload: payload,
@@ -133,7 +136,7 @@ class Ride {
 
   static Future<bool?> addDriver(Map payload) async {
     try {
-      final res = await HTTPClient.sendRequest(
+      await HTTPClient.sendRequest(
         method: 'post',
         path: 'ride/addDriver',
         payload: payload,

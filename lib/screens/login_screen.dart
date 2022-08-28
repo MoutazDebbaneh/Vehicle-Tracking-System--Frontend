@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:vtracker/Services/auth_controller.dart';
 import 'package:vtracker/Services/secure_storage.dart';
 import 'package:vtracker/screens/home_screen.dart';
-
 import 'package:vtracker/screens/signup_screen.dart';
-import 'package:vtracker/models/user.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -25,71 +24,40 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = true;
 
   void _alreadyLoggedInCheck() async {
-    var email = await secureStorage.readSecureData('email');
-    var password = await secureStorage.readSecureData('password');
-    if (email == null || password == null) {
-      print('Not previously logged in');
-      setState(() {
-        isLoading = false;
-      });
-      return;
+    bool loggedIn = await AuthController.checkIfAlreadyLoggedIn(context);
+    if (loggedIn) {
+      _pushHomeScreen();
     }
-    print('Previously logged in');
-
-    User.login(email, password).then(
-      (_) {
-        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-      },
-      onError: (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.red[300],
-          content: Row(
-            children: [
-              const Icon(Icons.error),
-              const SizedBox(
-                width: 6,
-              ),
-              Text(e.toString().substring(11))
-            ],
-          ),
-        ));
-
-        setState(() {
-          isLoading = false;
-        });
-      },
-    );
+    setState(() {
+      isLoading = false;
+    });
   }
 
-  void _loginHandler() {
+  void _loginHandler() async {
     final isValidForm = formKey.currentState!.validate();
+
     if (!isValidForm) return;
     setState(() {
       isLoading = true;
     });
-    User.login(emailController.text, passwordController.text).then(
-      (_) {
-        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-      },
-      onError: (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.red[300],
-          content: Row(
-            children: [
-              const Icon(Icons.error),
-              const SizedBox(
-                width: 6,
-              ),
-              Text(e.toString().substring(11))
-            ],
-          ),
-        ));
 
-        setState(() {
-          isLoading = false;
-        });
-      },
+    bool loggedIn = await AuthController.login(
+      emailController.text,
+      passwordController.text,
+      context,
     );
+
+    if (loggedIn) {
+      _pushHomeScreen();
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void _pushHomeScreen() {
+    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
   }
 
   @override

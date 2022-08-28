@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:vtracker/Services/utils.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/screens/home_screen.dart';
 
@@ -39,58 +40,40 @@ class _AddPrivateRideScreenState extends State<AddPrivateRideScreen> {
         setState(() {
           isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.green,
-          content: Row(
-            children: const [
-              Icon(Icons.done),
-              SizedBox(
-                width: 6,
-              ),
-              Flexible(
-                  child: Text('Ride added to your private rides successfully'))
-            ],
-          ),
-        ));
 
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamed(HomeScreen.routeName);
+        Utils.showScaffoldMessage(
+          context: context,
+          msg: 'Ride added to your private rides successfully',
+          error: false,
+        );
+
+        _returnHome();
       }
-      on(TimeoutException) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.red[300],
-          content: Row(
-            children: const [
-              Icon(Icons.error),
-              SizedBox(
-                width: 6,
-              ),
-              Flexible(child: Text('Request timeout exceeded'))
-            ],
-          ),
-        ));
-        setState(() {
-          isLoading = false;
-        });
-      }
+    } on TimeoutException {
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: 'Request timeout exceeded',
+        error: true,
+      );
+      setState(() {
+        isLoading = false;
+      });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: [
-            const Icon(Icons.error),
-            const SizedBox(
-              width: 6,
-            ),
-            Flexible(child: Text(e.toString().substring(11)))
-          ],
-        ),
-      ));
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: e.toString().substring(11),
+        error: true,
+      );
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  void _returnHome() {
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamed(HomeScreen.routeName);
   }
 
   @override

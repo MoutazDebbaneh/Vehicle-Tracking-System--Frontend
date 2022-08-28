@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:vtracker/Services/utils.dart';
 import 'package:vtracker/models/instance.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/models/user.dart';
@@ -85,35 +86,28 @@ class _RideScreenState extends State<RideScreen> {
         widget.ride.isActive = true;
       }
 
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: ((context) => DriveScreen(widget.ride, instance!))));
+      _pushDriveScreen(instance!);
     } on TimeoutException {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: const [
-            Icon(Icons.error),
-            SizedBox(
-              width: 6,
-            ),
-            Text('Request timeout exceeded'),
-          ],
-        ),
-      ));
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: 'Request timeout exceeded',
+        error: true,
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: [
-            const Icon(Icons.error),
-            const SizedBox(
-              width: 6,
-            ),
-            Flexible(child: Text(e.toString()))
-          ],
-        ),
-      ));
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: e.toString().substring(11),
+        error: true,
+      );
     }
+  }
+
+  void _pushDriveScreen(RideInstance instance) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: ((context) => DriveScreen(widget.ride, instance)),
+      ),
+    );
   }
 
   @override
@@ -183,6 +177,14 @@ class _RideScreenState extends State<RideScreen> {
                     text: widget.ride.isPublic! ? 'Public' : 'Private',
                     label: 'Ride Visibility',
                     icon: const Icon(Icons.visibility),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  IconedTextField(
+                    text: widget.ride.vehicle!,
+                    label: 'Ride Vehicle',
+                    icon: const Icon(Icons.drive_eta),
                   ),
                   const SizedBox(
                     height: 20,

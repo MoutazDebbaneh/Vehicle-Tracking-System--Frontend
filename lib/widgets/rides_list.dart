@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:vtracker/Services/utils.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/screens/ride_screen.dart';
 
@@ -28,26 +29,14 @@ class _RidesListState extends State<RidesList> {
   }
 
   void _deleteRide(String rideId) async {
-    bool? confirmDelete = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: const Text('Confirm Delete'),
-              content: const Text('Are you sure you want to delete this ride?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancle'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Delete'),
-                ),
-              ],
-            ));
+    bool? confirmDelete = await Utils.showConfirmDialog(
+      context: context,
+      title: 'Confirm Delete',
+      content: 'Are you sure you want to delete this ride??',
+      confirmString: 'Delete',
+    );
 
-    if (confirmDelete == null || !confirmDelete) {
-      return;
-    }
+    if (confirmDelete == null || !confirmDelete) return;
 
     setState(() {
       isLoading = true;
@@ -56,36 +45,23 @@ class _RidesListState extends State<RidesList> {
     try {
       bool? result = await Ride.deleteRide(rideId);
       if (result != null && result) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.green,
-          content: Row(
-            children: const [
-              Icon(Icons.done),
-              SizedBox(
-                width: 6,
-              ),
-              Text('Ride deleted successfully')
-            ],
-          ),
-        ));
+        Utils.showScaffoldMessage(
+          context: context,
+          msg: 'Ride deleted successfully',
+          error: false,
+        );
+
         _refreshIndicatorKey.currentState?.show();
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: [
-            const Icon(Icons.error),
-            const SizedBox(
-              width: 6,
-            ),
-            Text(e.toString().substring(11))
-          ],
-        ),
-      ));
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: e.toString().substring(11),
+        error: true,
+      );
       setState(() {
         isLoading = false;
       });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:vtracker/Services/map_controller.dart';
+import 'package:vtracker/Services/utils.dart';
 import 'package:vtracker/config.dart';
 import 'package:vtracker/models/instance.dart';
 import 'dart:async';
@@ -23,7 +24,6 @@ class ViewInstanceScreen extends StatefulWidget {
 }
 
 class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
-  final Completer<GoogleMapController> _controller = Completer();
   GoogleMapController? googleMapController;
 
   late final LatLng sourceLocation;
@@ -50,23 +50,21 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
 
   Timer? timer;
 
+  void _returnHome() {
+    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+  }
+
   Future<bool?> _fetchLocation() async {
     try {
       RideInstance instance = await RideInstance.get(widget.rideInstance.id);
       if (instance.endDate != null && instance.endDate!.isNotEmpty) {
-        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.green,
-          content: Row(
-            children: const [
-              Icon(Icons.done),
-              SizedBox(
-                width: 6,
-              ),
-              Flexible(child: Text('Ride ended'))
-            ],
-          ),
-        ));
+        _returnHome();
+
+        Utils.showScaffoldMessage(
+          context: context,
+          msg: 'Ride ended',
+          error: false,
+        );
       }
       if (instance.path != null && instance.path!.isNotEmpty) {
         setState(() {
@@ -126,12 +124,12 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
     }
   }
 
-  void initMarkers() async {
+  void _initMarkers() async {
     currentLocationIcon = await MapController.loadCustomMarkerIcon(
         'assets/images/car_icon.png', 60);
   }
 
-  void initLocations() {
+  void _initLocations() {
     sourceLocation = LatLng(
       double.parse(widget.ride.startPoint['latitude']['\$numberDecimal']),
       double.parse(widget.ride.startPoint['longitude']['\$numberDecimal']),
@@ -163,22 +161,12 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
     }
   }
 
-  Future<bool?> initController() async {
-    GoogleMapController mapController = await _controller.future;
-
-    setState(() {
-      googleMapController = mapController;
-    });
-
-    return true;
-  }
-
-  void initTimer() {
+  void _initTimer() {
     timer = Timer.periodic(
         Config.mapRefreshDuration, (Timer t) => _checkForUpdates());
   }
 
-  void loadCompleteMapData() async {
+  void _loadCompleteMapData() async {
     try {
       RideInstance fullInstance =
           await RideInstance.get(widget.rideInstance.id);
@@ -186,18 +174,11 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
       widget.rideInstance.path = fullInstance.path;
     } catch (e) {
       print(e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: [
-            const Icon(Icons.error),
-            const SizedBox(
-              width: 6,
-            ),
-            Flexible(child: Text(e.toString()))
-          ],
-        ),
-      ));
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: e.toString().substring(11),
+        error: true,
+      );
     }
 
     setState(() {
@@ -224,26 +205,24 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
     });
   }
 
-  void initMapData() {
+  void _initMapData() {
     if (widget.isActive) {
-      loadCompleteMapData();
-      initMarkers();
-      initTimer();
+      _loadCompleteMapData();
+      _initMarkers();
+      _initTimer();
     } else {
-      loadCompleteMapData();
+      _loadCompleteMapData();
     }
   }
 
   void _init() async {
-    // await initController();
-    initLocations();
-    initMapData();
+    _initLocations();
+    _initMapData();
   }
 
   @override
   void initState() {
     _init();
-
     super.initState();
   }
 

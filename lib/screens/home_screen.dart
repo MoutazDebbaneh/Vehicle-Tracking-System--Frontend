@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vtracker/Services/auth_controller.dart';
 import 'package:vtracker/Services/secure_storage.dart';
 import 'package:vtracker/models/instance.dart';
 import 'package:vtracker/models/user.dart';
@@ -23,34 +24,17 @@ class _HomeScreenState extends State<HomeScreen> {
   final SecureStorage secureStorage = SecureStorage();
 
   void _handleSignout() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-      bool? res = await User.signout();
-      if (res != null && res == true) {
-        User.ownUser = null;
-        await secureStorage.deleteSecureData('email');
-        await secureStorage.deleteSecureData('password');
-        Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: [
-            const Icon(Icons.error),
-            const SizedBox(
-              width: 6,
-            ),
-            Text(e.toString().substring(11))
-          ],
-        ),
-      ));
+    bool signedOut = await AuthController.signout(context);
+    if (signedOut) {
+      _returnToLoginScreen();
     }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  _returnToLoginScreen() {
+    Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
   }
 
   void _handleFloatingButtonPress() {

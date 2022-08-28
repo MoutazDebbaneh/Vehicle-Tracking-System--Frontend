@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:vtracker/Services/auth_controller.dart';
 import 'package:vtracker/screens/login_screen.dart';
-import '../models/user.dart';
-import 'home_screen.dart';
+import 'package:vtracker/screens/home_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   static const routeName = "/signup";
@@ -23,39 +23,32 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool isLoading = false;
 
-  void _signupHandler() {
+  void _signupHandler() async {
     final isValidForm = formKey.currentState!.validate();
     if (!isValidForm) return;
     setState(() {
       isLoading = true;
     });
-    User.signup(
-      firstNameController.text,
-      lastNameController.text,
-      emailController.text,
-      passwordController.text,
-    ).then(
-      (_) {
-        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-      },
-      onError: (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.red[300],
-          content: Row(
-            children: [
-              const Icon(Icons.error),
-              const SizedBox(
-                width: 6,
-              ),
-              Text(e.toString().substring(11))
-            ],
-          ),
-        ));
-        setState(() {
-          isLoading = false;
-        });
-      },
+
+    bool loggedIn = await AuthController.signup(
+      firstName: firstNameController.text,
+      lastName: lastNameController.text,
+      email: emailController.text,
+      password: passwordController.text,
+      context: context,
     );
+
+    if (loggedIn) {
+      _pushHomeScreen();
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void _pushHomeScreen() {
+    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
   }
 
   @override

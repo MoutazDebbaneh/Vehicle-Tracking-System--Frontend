@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.vtracker">
    <application
-        android:label="vtracker"
+        android:label="VTracker"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

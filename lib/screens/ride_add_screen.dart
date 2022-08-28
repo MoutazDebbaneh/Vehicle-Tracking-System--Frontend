@@ -5,6 +5,7 @@ import 'package:location/location.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:open_street_map_search_and_pick/open_street_map_search_and_pick.dart';
 import 'package:place_picker/place_picker.dart';
+import 'package:vtracker/Services/utils.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/models/user.dart';
 import 'package:vtracker/screens/location_picker_screen.dart';
@@ -34,8 +35,10 @@ class _RideAddScreenState extends State<RideAddScreen> {
   bool visibilityDropDown = false;
   bool repeatitionDropDown = false;
   bool loopingDropDown = false;
+  bool vehicleDropDown = false;
 
   String visibility = 'Private';
+  String vehicle = 'Car';
   String repeatition = 'No';
   String looping = 'No';
 
@@ -53,6 +56,13 @@ class _RideAddScreenState extends State<RideAddScreen> {
 
   final List _selectedKeyPoints = [];
 
+  final List<DropdownMenuItem<String>> visibilityOptions = [
+    const DropdownMenuItem(
+      value: 'Private',
+      child: Text('Private'),
+    )
+  ];
+
   void _handleRideAdd() async {
     final isValidForm = formKey.currentState!.validate();
     if (!isValidForm) return;
@@ -61,6 +71,7 @@ class _RideAddScreenState extends State<RideAddScreen> {
     rideData['title'] = rideTitleController.text;
     rideData['creator'] = User.ownUser!.id;
     rideData['is_public'] = (visibility == 'Private' ? false : true);
+    rideData['vehicle'] = vehicle;
     rideData['is_repeatitive'] = (repeatition == 'No' ? false : true);
 
     rideData['start_point'] = {
@@ -110,33 +121,26 @@ class _RideAddScreenState extends State<RideAddScreen> {
       if (addedRide == null) {
         throw Exception('Unexpected error');
       }
-      Navigator.of(context).pop();
+
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: 'Ride added successfully',
+        error: false,
+      );
+
+      _returnHome();
     } on TimeoutException {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: const [
-            Icon(Icons.error),
-            SizedBox(
-              width: 6,
-            ),
-            Text('Request timeout exceeded'),
-          ],
-        ),
-      ));
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: 'Request timeout exceeded',
+        error: true,
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.red[300],
-        content: Row(
-          children: [
-            const Icon(Icons.error),
-            const SizedBox(
-              width: 6,
-            ),
-            Flexible(child: Text(e.toString()))
-          ],
-        ),
-      ));
+      Utils.showScaffoldMessage(
+        context: context,
+        msg: e.toString().substring(11),
+        error: true,
+      );
     }
 
     setState(() {
@@ -193,6 +197,14 @@ class _RideAddScreenState extends State<RideAddScreen> {
     );
   }
 
+  void _returnHome() {
+    Navigator.of(context).pop();
+  }
+
+  String _formatTime(TimeOfDay timeOfDay) {
+    return timeOfDay.format(context).trim();
+  }
+
   void showPlacePicker(String type) async {
     Location location = Location();
     setState(() {
@@ -234,6 +246,19 @@ class _RideAddScreenState extends State<RideAddScreen> {
         }
       });
     });
+  }
+
+  @override
+  void initState() {
+    if (User.ownUser!.type == "admin") {
+      visibilityOptions.add(
+        const DropdownMenuItem(
+          value: 'Public',
+          child: Text('Public'),
+        ),
+      );
+    }
+    super.initState();
   }
 
   @override
@@ -309,15 +334,48 @@ class _RideAddScreenState extends State<RideAddScreen> {
                                   onTap: () => setState(() {
                                     visibilityDropDown = true;
                                   }),
+                                  items: visibilityOptions,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: visibilityDropDown
+                                          ? Colors.purple
+                                          : Colors.grey,
+                                      width: 1,
+                                      style: BorderStyle.solid,
+                                    ),
+                                  ),
+                                ),
+                                child: DropdownButton(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(1)),
+                                  isExpanded: true,
+                                  value: vehicle,
+                                  underline: Container(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      vehicle = value.toString();
+                                      vehicleDropDown = false;
+                                    });
+                                  },
+                                  onTap: () => setState(() {
+                                    vehicleDropDown = true;
+                                  }),
                                   items: const [
                                     DropdownMenuItem(
-                                      value: 'Private',
-                                      child: Text('Private'),
+                                      value: 'Car',
+                                      child: Text('Car'),
                                     ),
                                     DropdownMenuItem(
-                                      value: 'Public',
-                                      child: Text('Public'),
-                                    )
+                                      value: 'Bus',
+                                      child: Text('Bus'),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -570,9 +628,8 @@ class _RideAddScreenState extends State<RideAddScreen> {
                                                   if (newTime == null) {
                                                     return;
                                                   }
-                                                  String timeText = newTime
-                                                      .format(context)
-                                                      .trim();
+                                                  String timeText =
+                                                      _formatTime(newTime);
 
                                                   if (timeText[1] == ':') {
                                                     timeText = '0$timeText';

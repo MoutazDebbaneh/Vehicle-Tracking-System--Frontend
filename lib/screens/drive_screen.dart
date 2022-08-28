@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:vtracker/Services/map_controller.dart';
+import 'package:vtracker/Services/utils.dart';
 import 'package:vtracker/models/instance.dart';
 import 'dart:async';
 import 'dart:typed_data';
@@ -44,24 +45,14 @@ class _DriveScreenState extends State<DriveScreen> {
   Marker? curLocationMarker;
 
   void _handleEndRide() async {
-    bool? confirmEnd = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: const Text('Confirm Ride End'),
-              content: const Text('Are you sure you want to end this ride?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancle'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('End'),
-                ),
-              ],
-            ));
+    bool? confirmEnd = await Utils.showConfirmDialog(
+      context: context,
+      title: 'Confirm Ride End',
+      content: 'Are you sure you want to end this ride?',
+      confirmString: 'End',
+    );
 
-    if (confirmEnd != null && !confirmEnd) return;
+    if (confirmEnd == null || !confirmEnd) return;
 
     String curDate = DateFormat("yyyy-MM-dd hh:mm a").format(DateTime.now());
     try {
@@ -75,26 +66,23 @@ class _DriveScreenState extends State<DriveScreen> {
         User.ownUser!.currentDrivingInstance = null;
         widget.ride.isActive = false;
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.green,
-          content: Row(
-            children: const [
-              Icon(Icons.done),
-              SizedBox(
-                width: 6,
-              ),
-              Flexible(child: Text('Drive ended succesfully'))
-            ],
-          ),
-        ));
+        Utils.showScaffoldMessage(
+          context: context,
+          msg: 'Drive ended succesfully',
+          error: false,
+        );
 
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
-        Navigator.of(context).pushNamed(HomeScreen.routeName);
+        _returnHome();
       }
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  void _returnHome() {
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamed(HomeScreen.routeName);
   }
 
   void _updateLocation(LocationData newloc) async {
@@ -127,6 +115,9 @@ class _DriveScreenState extends State<DriveScreen> {
 
     _locationSubscription = location.onLocationChanged.listen((newloc) {
       _updateLocation(newloc);
+
+      polylineCoordinates.add(LatLng(newloc.latitude!, newloc.longitude!));
+
       setState(() {
         currentLocation = newloc;
 
@@ -140,15 +131,6 @@ class _DriveScreenState extends State<DriveScreen> {
         );
       });
       setState(() {});
-    });
-  }
-
-  void getPolyPoints() async {
-    List<LatLng> cords = await MapController.getPolyPoints(
-        sourceLocation, destination, keyPoints);
-
-    setState(() {
-      polylineCoordinates += cords;
     });
   }
 
@@ -194,7 +176,6 @@ class _DriveScreenState extends State<DriveScreen> {
     initLocations();
     initMarkers();
     getCurrentLocation();
-    getPolyPoints();
     super.initState();
   }
 
@@ -268,7 +249,9 @@ class _DriveScreenState extends State<DriveScreen> {
               circles: {
                 Circle(
                   circleId: const CircleId("car"),
-                  radius: currentLocation!.accuracy! + 10,
+                  radius: currentLocation!.accuracy! >= 8
+                      ? currentLocation!.accuracy!
+                      : 8,
                   zIndex: 1,
                   strokeColor: Colors.blue,
                   center: LatLng(
