@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:vtracker/Services/http_client.dart';
 import 'package:vtracker/Services/secure_storage.dart';
 import 'package:vtracker/config.dart';
+import 'package:vtracker/models/instance.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -13,10 +14,12 @@ class User {
   final String email;
   final String type;
 
+  String? currentDrivingInstance;
   String? accessToken;
   String? refreshToken;
 
   static User? ownUser;
+  static RideInstance? currentInstance;
 
   static SecureStorage secureStorage = SecureStorage();
 
@@ -28,6 +31,7 @@ class User {
     required this.type,
     this.accessToken,
     this.refreshToken,
+    this.currentDrivingInstance,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,7 @@ class User {
       type: json['type'],
       accessToken: json['accessToken'],
       refreshToken: json['refreshToken'],
+      currentDrivingInstance: json['current_driving_instance'],
     );
   }
 
@@ -48,6 +53,8 @@ class User {
           Uri.parse('${Config.serverURL}/api/auth/signin'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
+            // "Access-Control-Allow-Origin":
+            //     "*", // Required for CORS support to work
           },
           body: jsonEncode(
             <String, String>{
@@ -67,7 +74,10 @@ class User {
             jsonDecode(res.body)['error'] ?? "Unexpected error occurred";
         throw Exception(errorMsg);
       }
-    }, onError: (e) => {throw Exception("Request timeout exceeded")});
+    }, onError: (e) {
+      print(e.toString());
+      throw Exception("Request timeout exceeded");
+    });
   }
 
   static signup(

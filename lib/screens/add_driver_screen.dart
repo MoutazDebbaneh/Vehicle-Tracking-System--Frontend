@@ -47,6 +47,8 @@ class _AddDriverScreenState extends State<AddDriverScreen> {
             ],
           ),
         ));
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
       }
       on(TimeoutException) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vtracker/Services/secure_storage.dart';
+import 'package:vtracker/models/instance.dart';
 import 'package:vtracker/models/user.dart';
 import 'package:vtracker/screens/add_private_ride_screen.dart';
 import 'package:vtracker/screens/login_screen.dart';
@@ -56,6 +57,34 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.of(context).pushNamed(_currentIndex == 2
         ? RideAddScreen.routeName
         : AddPrivateRideScreen.routeName);
+  }
+
+  void _getCurrentInstance() async {
+    while (User.currentInstance == null) {
+      try {
+        User.currentInstance =
+            await RideInstance.get(User.ownUser!.currentDrivingInstance!);
+      } catch (e) {
+        print(e.toString());
+      }
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    if (User.ownUser!.currentDrivingInstance != null &&
+        User.ownUser!.currentDrivingInstance!.isNotEmpty) {
+      if (User.currentInstance == null) {
+        setState(() {
+          isLoading = true;
+        });
+        _getCurrentInstance();
+      }
+    }
+    super.initState();
   }
 
   @override

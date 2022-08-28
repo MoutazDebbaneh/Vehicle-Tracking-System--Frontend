@@ -23,7 +23,8 @@ class HTTPClient {
             'Content-Type': 'application/json; charset=UTF-8',
             'Authorization': 'Bearer ${User.ownUser!.accessToken!}',
           },
-        ).timeout(Config.requestTimeoutDuration);
+        ).timeout(Config.requestTimeoutDuration,
+            onTimeout: () => throw Exception('Request timeout exceeded'));
         break;
       case 'post':
         response = await http
@@ -35,7 +36,8 @@ class HTTPClient {
               },
               body: jsonEncode(payload),
             )
-            .timeout(Config.requestTimeoutDuration);
+            .timeout(Config.requestTimeoutDuration,
+                onTimeout: () => throw Exception('Request timeout exceeded'));
         break;
       case 'patch':
         response = await http
@@ -60,7 +62,8 @@ class HTTPClient {
               },
               body: jsonEncode(payload),
             )
-            .timeout(Config.requestTimeoutDuration);
+            .timeout(Config.requestTimeoutDuration,
+                onTimeout: () => throw Exception('Request timeout exceeded'));
         break;
       default:
     }

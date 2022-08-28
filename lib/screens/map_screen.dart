@@ -19,9 +19,6 @@ class _MapScreenState extends State<MapScreen> {
   static const sourceLocation = LatLng(33.5543519, 36.316056);
   static const destination = LatLng(33.5483876, 36.3130311);
 
-  // static const sourceLocation = LatLng(37.33500926, -122.03272188);
-  // static const destination = LatLng(37.33429383, -122.06600055);
-
   final mapZoom = 19.0;
 
   List<LatLng> polylineCoordinates = [];
@@ -67,7 +64,7 @@ class _MapScreenState extends State<MapScreen> {
 
   void getPolyPoints() async {
     List<LatLng> cords =
-        await MapController.getPolyPoints(sourceLocation, destination);
+        await MapController.getPolyPoints(sourceLocation, destination, []);
 
     setState(() {
       polylineCoordinates += cords;

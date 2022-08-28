@@ -17,6 +17,8 @@ class _RidesListState extends State<RidesList> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
+  bool isLoading = false;
+
   Future<List<Ride>> _refreshRides(BuildContext context) async {
     _refreshIndicatorKey.currentState?.show();
     setState(() {
@@ -47,6 +49,10 @@ class _RidesListState extends State<RidesList> {
       return;
     }
 
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       bool? result = await Ride.deleteRide(rideId);
       if (result != null && result) {
@@ -63,6 +69,9 @@ class _RidesListState extends State<RidesList> {
           ),
         ));
         _refreshIndicatorKey.currentState?.show();
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -77,6 +86,9 @@ class _RidesListState extends State<RidesList> {
           ],
         ),
       ));
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -94,75 +106,103 @@ class _RidesListState extends State<RidesList> {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
       onRefresh: () => _refreshRides(context),
-      child: FutureBuilder(
-        future: Ride.getRides(widget.type, _refreshIndicatorKey),
-        builder: (BuildContext context, AsyncSnapshot<List<Ride>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Container();
-          } else if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return LayoutBuilder(builder: (context, constraints) {
-                return ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20.0),
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                            size: 60,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 16),
-                            child: Text('Error: Could not fetch data'),
+      child: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : FutureBuilder(
+              future: Ride.getRides(widget.type, _refreshIndicatorKey),
+              builder:
+                  (BuildContext context, AsyncSnapshot<List<Ride>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container();
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return LayoutBuilder(builder: (context, constraints) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20.0),
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red,
+                                  size: 60,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 16),
+                                  child: Text('Error: Could not fetch data'),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
-                      ),
-                    ),
-                  ],
-                );
-              });
-            } else if (snapshot.hasData) {
-              List<Ride> rides = snapshot.data!;
+                      );
+                    });
+                  } else if (snapshot.hasData) {
+                    List<Ride> rides = snapshot.data!;
 
-              return ListView.builder(
-                itemCount: rides.length,
-                itemBuilder: (context, index) => Card(
-                  elevation: 1,
-                  child: ListTile(
-                    trailing: widget.ownRides
-                        ? InkWell(
-                            child: const Icon(
-                              Icons.delete,
-                              color: Colors.red,
+                    return ListView.builder(
+                      itemCount: rides.length,
+                      itemBuilder: (context, index) => Card(
+                        elevation: 1,
+                        child: ListTile(
+                          trailing: widget.ownRides
+                              ? InkWell(
+                                  child: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onTap: () => _deleteRide(rides[index].id),
+                                )
+                              : null,
+                          leading: Container(
+                            margin: const EdgeInsets.only(top: 10),
+                            child: Icon(Icons.circle,
+                                size: 20,
+                                color: rides[index].isActive != null &&
+                                        rides[index].isActive!
+                                    ? Colors.green
+                                    : Colors.grey),
+                          ),
+                          title: rides[index].isFinished != null &&
+                                  rides[index].isFinished!
+                              ? Row(
+                                  children: [
+                                    Text(rides[index].title),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    const Icon(
+                                      Icons.done_all,
+                                      color: Colors.green,
+                                    )
+                                  ],
+                                )
+                              : Text(rides[index].title),
+                          subtitle: Text(
+                              rides[index].isPublic! ? 'Public' : 'Private'),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => RideScreen(rides[index]),
                             ),
-                            onTap: () => _deleteRide(rides[index].id),
-                          )
-                        : null,
-                    title: Text(rides[index].title),
-                    subtitle:
-                        Text(rides[index].isPublic! ? 'Public' : 'Private'),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => RideScreen(rides[index]),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              );
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                }
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
     );
   }
 }

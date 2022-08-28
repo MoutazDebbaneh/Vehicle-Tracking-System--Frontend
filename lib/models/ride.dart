@@ -12,10 +12,14 @@ class Ride {
   final dynamic endPoint;
 
   bool? isPublic;
+  bool? isActive;
+  bool? isFinished;
+
   String? accessKey;
   bool? isRepeatitive;
   dynamic repeatition;
   List<dynamic>? keyPoints;
+  List<dynamic>? drivers;
   String? oneTimeDate;
 
   Ride({
@@ -25,10 +29,13 @@ class Ride {
     required this.startPoint,
     required this.endPoint,
     this.isPublic,
+    this.isActive,
+    this.isFinished,
     this.accessKey,
     this.isRepeatitive,
     this.repeatition,
     this.keyPoints,
+    this.drivers,
     this.oneTimeDate,
   });
 
@@ -40,15 +47,14 @@ class Ride {
         startPoint: json['start_point'],
         endPoint: json['end_point'],
         isPublic: json['is_public'],
+        isActive: json['is_active'],
+        isFinished: json['is_finished'],
         accessKey: json['access_key'],
         isRepeatitive: json['is_repeatitive'],
         repeatition: json['repeatition'],
         keyPoints: json['key_points'],
-        oneTimeDate: json['one_time_date']
-        // oneTimeDate: json['one_time_date'] != null
-        //     ? DateTime.parse(json['one_time_date'])
-        //     : null,
-        );
+        drivers: json['drivers'],
+        oneTimeDate: json['one_time_date']);
   }
 
   static Future<List<Ride>> getRides(
@@ -98,7 +104,7 @@ class Ride {
       final res = await HTTPClient.sendRequest(
         method: 'delete',
         path: 'ride/delete/$rideId',
-        payload: null,
+        payload: {},
         queryParameters: null,
       );
 

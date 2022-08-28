@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
+import 'package:intl/intl.dart';
+import 'package:vtracker/models/instance.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/models/user.dart';
 import 'package:vtracker/screens/add_driver_screen.dart';
+import 'package:vtracker/screens/drive_screen.dart';
+import 'package:vtracker/screens/instances_screen.dart';
 import 'package:vtracker/widgets/iconed_text_field.dart';
 
 class RideScreen extends StatefulWidget {
@@ -28,9 +33,9 @@ class _RideScreenState extends State<RideScreen> {
                 return ListTile(
                   title: Text(items[index]),
                   leading: const Icon(
-                    Icons.circle,
-                    color: Colors.green,
-                    size: 16,
+                    Icons.arrow_right,
+                    color: Colors.blue,
+                    size: 40,
                   ),
                 );
               },
@@ -44,9 +49,71 @@ class _RideScreenState extends State<RideScreen> {
         ),
       );
 
+  void _viewInstancesHandler() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: ((context) => InstancesScreen(widget.ride)),
+      ),
+    );
+  }
+
   void _assignDriverHandler() {
     Navigator.of(context).push(MaterialPageRoute(
         builder: ((context) => AddDriverScreen(widget.ride.id))));
+  }
+
+  void _handleStartRide() async {
+    String curDate = DateFormat("yyyy-MM-dd hh:mm a").format(DateTime.now());
+
+    if (User.currentInstance != null &&
+        User.currentInstance!.rideId == widget.ride.id) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: ((context) =>
+              DriveScreen(widget.ride, User.currentInstance!))));
+      return;
+    }
+
+    try {
+      RideInstance? instance = await RideInstance.startInstance(
+        {'start_date': curDate},
+        widget.ride.id,
+      );
+
+      if (instance != null) {
+        User.ownUser!.currentDrivingInstance = instance.id;
+        User.currentInstance = instance;
+        widget.ride.isActive = true;
+      }
+
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: ((context) => DriveScreen(widget.ride, instance!))));
+    } on TimeoutException {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red[300],
+        content: Row(
+          children: const [
+            Icon(Icons.error),
+            SizedBox(
+              width: 6,
+            ),
+            Text('Request timeout exceeded'),
+          ],
+        ),
+      ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red[300],
+        content: Row(
+          children: [
+            const Icon(Icons.error),
+            const SizedBox(
+              width: 6,
+            ),
+            Flexible(child: Text(e.toString()))
+          ],
+        ),
+      ));
+    }
   }
 
   @override
@@ -68,6 +135,19 @@ class _RideScreenState extends State<RideScreen> {
                     text: widget.ride.title,
                     label: 'Ride Title',
                     icon: const Icon(Icons.title),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  IconedTextField(
+                    text: widget.ride.isActive != null && widget.ride.isActive!
+                        ? 'Online'
+                        : 'Offline',
+                    label: 'Ride Status',
+                    icon: Icon(
+                        widget.ride.isActive != null && widget.ride.isActive!
+                            ? Icons.location_on
+                            : Icons.location_off),
                   ),
                   widget.ride.creator == User.ownUser!.id &&
                           widget.ride.isPublic != null &&
@@ -220,25 +300,111 @@ class _RideScreenState extends State<RideScreen> {
                     label: 'Ride Ending Location',
                     icon: const Icon(Icons.location_on),
                   ),
-                  widget.ride.creator == User.ownUser!.id
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  widget.ride.creator == User.ownUser!.id ||
+                          widget.ride.drivers!
+                              .map((e) => e['email'])
+                              .toList()
+                              .contains(User.ownUser!.email)
                       ? Column(
                           children: [
+                            InkWell(
+                              onTap: () => _openDialog(
+                                  'Ride Drivers',
+                                  widget.ride.drivers!
+                                      .map((e) => e['email'])
+                                      .toList()),
+                              child: IconedTextField(
+                                text: widget.ride.drivers!
+                                    .map((e) => e['email'])
+                                    .toList()
+                                    .toString()
+                                    .substring(
+                                        1,
+                                        widget.ride.drivers!
+                                                .map((e) => e['email'])
+                                                .toList()
+                                                .toString()
+                                                .length -
+                                            1),
+                                label: 'Ride Drivers',
+                                icon: const Icon(Icons.person),
+                              ),
+                            ),
                             const SizedBox(
                               height: 20,
                             ),
-                            ElevatedButton(
-                              onPressed: _assignDriverHandler,
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.green),
-                                padding: MaterialStateProperty.all<EdgeInsets>(
-                                    const EdgeInsets.all(16)),
-                              ),
-                              child: const Text('Assign Driver'),
-                            ),
                           ],
                         )
-                      : Container()
+                      : Container(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      widget.ride.creator == User.ownUser!.id
+                          ? Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              child: ElevatedButton(
+                                onPressed: _assignDriverHandler,
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.green),
+                                  padding:
+                                      MaterialStateProperty.all<EdgeInsets>(
+                                          const EdgeInsets.all(16)),
+                                ),
+                                child: const Text('Assign Driver'),
+                              ),
+                            )
+                          : Container(),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        child: ElevatedButton(
+                          onPressed: _viewInstancesHandler,
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.green),
+                            padding: MaterialStateProperty.all<EdgeInsets>(
+                                const EdgeInsets.all(16)),
+                          ),
+                          child: const Text('View'),
+                        ),
+                      ),
+                      widget.ride.drivers!
+                              .map((e) => e['email'])
+                              .toList()
+                              .contains(User.ownUser!.email)
+                          ? Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              child: ElevatedButton(
+                                onPressed: (User.currentInstance != null &&
+                                            User.currentInstance!.rideId !=
+                                                widget.ride.id) ||
+                                        (widget.ride.isFinished != null &&
+                                            widget.ride.isFinished!)
+                                    ? null
+                                    : _handleStartRide,
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.green),
+                                  padding:
+                                      MaterialStateProperty.all<EdgeInsets>(
+                                          const EdgeInsets.all(16)),
+                                ),
+                                child: Text(User.currentInstance != null &&
+                                        User.currentInstance!.rideId ==
+                                            widget.ride.id
+                                    ? 'Drive Screen'
+                                    : 'Start Ride'),
+                              ),
+                            )
+                          : Container()
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
                 ],
               ),
             ),

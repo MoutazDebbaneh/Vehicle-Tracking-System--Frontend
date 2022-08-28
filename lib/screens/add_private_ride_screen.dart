@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:vtracker/models/ride.dart';
+import 'package:vtracker/screens/home_screen.dart';
 
 class AddPrivateRideScreen extends StatefulWidget {
   static const routeName = "/addPrivateRide";
@@ -51,6 +52,10 @@ class _AddPrivateRideScreenState extends State<AddPrivateRideScreen> {
             ],
           ),
         ));
+
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+        Navigator.of(context).pushNamed(HomeScreen.routeName);
       }
       on(TimeoutException) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

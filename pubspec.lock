@@ -15,6 +15,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  change_app_package_name:
+    dependency: "direct main"
+    description:
+      name: change_app_package_name
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.0"
   characters:
     dependency: transitive
     description:
@@ -178,7 +185,7 @@ packages:
     source: hosted
     version: "4.0.1"
   intl:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: intl
       url: "https://pub.dartlang.org"
@@ -264,9 +271,11 @@ packages:
   multi_select_flutter:
     dependency: "direct main"
     description:
-      name: multi_select_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "22ea971eb379b98a6508e02543dd52f41fc73db1"
+      url: "https://github.com/MoutazDebbaneh/multi_select_flutter"
+    source: git
     version: "4.1.2"
   open_street_map_search_and_pick:
     dependency: "direct main"

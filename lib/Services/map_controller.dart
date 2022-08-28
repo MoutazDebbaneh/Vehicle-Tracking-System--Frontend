@@ -9,9 +9,18 @@ import 'package:vtracker/config.dart';
 
 class MapController {
   static Future<List<LatLng>> getPolyPoints(
-      LatLng sourceLocation, LatLng destination) async {
+      LatLng sourceLocation, LatLng destination, List<LatLng> keyPoints) async {
+    String pointsParam =
+        'point=${sourceLocation.latitude},${sourceLocation.longitude}&';
+
+    for (var point in keyPoints) {
+      pointsParam += 'point=${point.latitude},${point.longitude}&';
+    }
+
+    pointsParam += 'point=${destination.latitude},${destination.longitude}';
+
     String url =
-        'https://graphhopper.com/api/1/route?point=${sourceLocation.latitude},${sourceLocation.longitude}&point=${destination.latitude},${destination.longitude}&key=${Config.graphHopperAPIKey}&points_encoded=false';
+        'https://graphhopper.com/api/1/route?$pointsParam&key=${Config.graphHopperAPIKey}&points_encoded=false';
 
     try {
       http.Response response =
