@@ -39,6 +39,7 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
   BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor destinationIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor locationAIcon = BitmapDescriptor.defaultMarker;
 
   StreamSubscription? _locationSubscription;
 
@@ -125,8 +126,19 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
   }
 
   void _initMarkers() async {
-    currentLocationIcon = await MapController.loadCustomMarkerIcon(
-        'assets/images/car_icon.png', 60);
+    if (widget.ride.vehicle != null && widget.ride.vehicle == "Bus") {
+      currentLocationIcon = await MapController.loadCustomMarkerIcon(
+          'assets/images/bus_icon.png', 80);
+    } else {
+      currentLocationIcon = await MapController.loadCustomMarkerIcon(
+          'assets/images/car_icon.png', 60);
+    }
+
+    sourceIcon = await MapController.loadCustomMarkerIcon(
+        'assets/images/location_a.png', 90);
+
+    destinationIcon = await MapController.loadCustomMarkerIcon(
+        'assets/images/location_b.png', 90);
   }
 
   void _initLocations() {
@@ -206,9 +218,9 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
   }
 
   void _initMapData() {
+    _initMarkers();
     if (widget.isActive) {
       _loadCompleteMapData();
-      _initMarkers();
       _initTimer();
     } else {
       _loadCompleteMapData();
@@ -274,10 +286,20 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
                 Marker(
                   markerId: const MarkerId("source"),
                   position: sourceLocation,
+                  icon: sourceIcon,
+                  infoWindow: InfoWindow(
+                    title: 'Location A',
+                    snippet: widget.ride.startPoint['address'],
+                  ),
                 ),
                 Marker(
                   markerId: const MarkerId("destination"),
                   position: destination,
+                  icon: destinationIcon,
+                  infoWindow: InfoWindow(
+                    title: 'Location B',
+                    snippet: widget.ride.endPoint['address'],
+                  ),
                 ),
                 widget.isActive
                     ? curLocationMarker = Marker(

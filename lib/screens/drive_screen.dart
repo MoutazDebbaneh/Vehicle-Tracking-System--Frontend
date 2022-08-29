@@ -135,8 +135,19 @@ class _DriveScreenState extends State<DriveScreen> {
   }
 
   void initMarkers() async {
-    currentLocationIcon = await MapController.loadCustomMarkerIcon(
-        'assets/images/car_icon.png', 60);
+    if (widget.ride.vehicle != null && widget.ride.vehicle == "Bus") {
+      currentLocationIcon = await MapController.loadCustomMarkerIcon(
+          'assets/images/bus_icon.png', 80);
+    } else {
+      currentLocationIcon = await MapController.loadCustomMarkerIcon(
+          'assets/images/car_icon.png', 60);
+    }
+
+    sourceIcon = await MapController.loadCustomMarkerIcon(
+        'assets/images/location_a.png', 90);
+
+    destinationIcon = await MapController.loadCustomMarkerIcon(
+        'assets/images/location_b.png', 90);
   }
 
   void initLocations() {
@@ -224,10 +235,20 @@ class _DriveScreenState extends State<DriveScreen> {
                 Marker(
                   markerId: const MarkerId("source"),
                   position: sourceLocation,
+                  icon: sourceIcon,
+                  infoWindow: InfoWindow(
+                    title: 'Location A',
+                    snippet: widget.ride.startPoint['address'],
+                  ),
                 ),
                 Marker(
                   markerId: const MarkerId("destination"),
                   position: destination,
+                  icon: destinationIcon,
+                  infoWindow: InfoWindow(
+                    title: 'Location B',
+                    snippet: widget.ride.endPoint['address'],
+                  ),
                 ),
                 curLocationMarker = Marker(
                   markerId: const MarkerId("current"),
