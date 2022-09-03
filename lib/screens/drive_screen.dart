@@ -177,6 +177,10 @@ class _DriveScreenState extends State<DriveScreen> {
         Marker(
           markerId: MarkerId("keypoint-$i"),
           position: keyPoints[i],
+          infoWindow: InfoWindow(
+            title: 'Key Point ${i + 1}',
+            snippet: widget.ride.keyPoints![i]['address'],
+          ),
         ),
       );
     }
@@ -232,6 +236,7 @@ class _DriveScreenState extends State<DriveScreen> {
                 ),
               },
               markers: {
+                ...keyPointsMarkers,
                 Marker(
                   markerId: const MarkerId("source"),
                   position: sourceLocation,

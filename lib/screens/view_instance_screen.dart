@@ -168,6 +168,10 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
         Marker(
           markerId: MarkerId("keypoint-$i"),
           position: keyPoints[i],
+          infoWindow: InfoWindow(
+            title: 'Key Point ${i + 1}',
+            snippet: widget.ride.keyPoints![i]['address'],
+          ),
         ),
       );
     }
@@ -283,6 +287,7 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
                 ),
               },
               markers: {
+                ...keyPointsMarkers,
                 Marker(
                   markerId: const MarkerId("source"),
                   position: sourceLocation,
