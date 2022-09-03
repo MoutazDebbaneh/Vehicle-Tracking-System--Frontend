@@ -5,7 +5,7 @@ import 'package:location/location.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:open_street_map_search_and_pick/open_street_map_search_and_pick.dart';
 import 'package:place_picker/place_picker.dart';
-import 'package:vtracker/Services/utils.dart';
+import 'package:vtracker/services/utils.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/models/user.dart';
 import 'package:vtracker/screens/location_picker_screen.dart';

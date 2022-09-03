@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
-import 'package:vtracker/Services/utils.dart';
+import 'package:vtracker/services/utils.dart';
 import 'package:vtracker/models/instance.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/models/user.dart';

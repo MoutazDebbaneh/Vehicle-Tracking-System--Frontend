@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vtracker/Services/auth_controller.dart';
-import 'package:vtracker/Services/secure_storage.dart';
+import 'package:vtracker/services/auth_controller.dart';
+import 'package:vtracker/services/secure_storage.dart';
 import 'package:vtracker/screens/home_screen.dart';
 import 'package:vtracker/screens/signup_screen.dart';
 

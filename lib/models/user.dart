@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:vtracker/Services/http_client.dart';
-import 'package:vtracker/Services/secure_storage.dart';
+import 'package:vtracker/services/http_client.dart';
+import 'package:vtracker/services/secure_storage.dart';
 import 'package:vtracker/config.dart';
 import 'package:vtracker/models/instance.dart';
 

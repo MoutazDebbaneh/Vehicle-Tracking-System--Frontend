@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../Services/http_client.dart';
+import '../services/http_client.dart';
 
 class Ride {
   final String id;

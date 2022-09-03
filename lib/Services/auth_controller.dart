@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:vtracker/Services/secure_storage.dart';
-import 'package:vtracker/Services/utils.dart';
+import 'package:vtracker/services/secure_storage.dart';
+import 'package:vtracker/services/utils.dart';
 import 'package:vtracker/models/user.dart';
 
 class AuthController {

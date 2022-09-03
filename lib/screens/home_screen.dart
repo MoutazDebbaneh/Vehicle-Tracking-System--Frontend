@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vtracker/Services/auth_controller.dart';
-import 'package:vtracker/Services/secure_storage.dart';
+import 'package:vtracker/services/auth_controller.dart';
+import 'package:vtracker/services/secure_storage.dart';
 import 'package:vtracker/models/instance.dart';
 import 'package:vtracker/models/user.dart';
 import 'package:vtracker/screens/add_private_ride_screen.dart';

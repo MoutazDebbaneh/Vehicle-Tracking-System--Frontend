@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:vtracker/Services/map_controller.dart';
-import 'package:vtracker/Services/utils.dart';
+import 'package:vtracker/services/map_controller.dart';
+import 'package:vtracker/services/utils.dart';
 import 'package:vtracker/config.dart';
 import 'package:vtracker/models/instance.dart';
 import 'dart:async';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vtracker/Services/utils.dart';
+import 'package:vtracker/services/utils.dart';
 import 'package:vtracker/models/ride.dart';
 import 'package:vtracker/screens/ride_screen.dart';
 
