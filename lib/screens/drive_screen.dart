@@ -44,6 +44,8 @@ class _DriveScreenState extends State<DriveScreen> {
 
   Marker? curLocationMarker;
 
+  int locationCounter = 0;
+
   void _handleEndRide() async {
     bool? confirmEnd = await Utils.showConfirmDialog(
       context: context,
@@ -105,7 +107,9 @@ class _DriveScreenState extends State<DriveScreen> {
     Location location = Location();
 
     location.getLocation().then((loc) {
-      _updateLocation(loc);
+      if (locationCounter >= 3) {
+        _updateLocation(loc);
+      }
       setState(() {
         currentLocation = loc;
       });
@@ -116,9 +120,12 @@ class _DriveScreenState extends State<DriveScreen> {
     _locationSubscription = location.onLocationChanged.listen((newloc) {
       _updateLocation(newloc);
 
-      polylineCoordinates.add(LatLng(newloc.latitude!, newloc.longitude!));
+      if (locationCounter >= 3) {
+        polylineCoordinates.add(LatLng(newloc.latitude!, newloc.longitude!));
+      }
 
       setState(() {
+        locationCounter++;
         currentLocation = newloc;
 
         googleMapController.animateCamera(

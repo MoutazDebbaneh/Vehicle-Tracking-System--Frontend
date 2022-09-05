@@ -67,9 +67,11 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
           error: false,
         );
       }
-      if (instance.path != null && instance.path!.isNotEmpty) {
+      if (instance.path != null &&
+          instance.path!.isNotEmpty &&
+          instance.path!.length > 3) {
         setState(() {
-          path = instance.path!;
+          path = instance.path!.sublist(3);
         });
       }
     } catch (e) {
@@ -187,7 +189,9 @@ class _ViewInstanceScreenState extends State<ViewInstanceScreen> {
       RideInstance fullInstance =
           await RideInstance.get(widget.rideInstance.id);
 
-      widget.rideInstance.path = fullInstance.path;
+      if (fullInstance.path!.length > 3) {
+        widget.rideInstance.path = fullInstance.path!.sublist(3);
+      }
     } catch (e) {
       print(e.toString());
       Utils.showScaffoldMessage(
